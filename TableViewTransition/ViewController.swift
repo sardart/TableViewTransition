@@ -11,15 +11,17 @@ import UIKit
 class ViewController: UIViewController {
     
     let cellHeight: CGFloat = 110
+    var yOffset: CGFloat = 0
     var actors = [Actor]()
     
     @IBOutlet weak var tableView: UITableView!
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
         actors = readActorsPlist()
         tableView.register(UINib(nibName: "ActorTableViewCell", bundle: Bundle.main), forCellReuseIdentifier: "actorCell")
+        animatedAppearence()
     }
     
     func readActorsPlist() -> [Actor] {
@@ -31,6 +33,15 @@ class ViewController: UIViewController {
             }
         }
         return actors
+    }
+    
+    func animatedAppearence() {
+        let trans = CGAffineTransform(translationX: -self.view.frame.width, y: 0)
+        tableView.transform = trans
+        UIView.animate(withDuration: 1) {
+            let trans = CGAffineTransform(translationX: 0, y: 0)
+            self.tableView.transform = trans
+        }
     }
     
     
@@ -47,6 +58,7 @@ extension ViewController: UITableViewDelegate, UITableViewDataSource {
         let detailedVC = UIStoryboard.init(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "DetailedViewController") as! DetailedViewController
         detailedVC.cellHeight = cellHeight
         detailedVC.actor = actors[indexPath.row]
+        detailedVC.yOffset = tableView.rectForRow(at: indexPath).minY - yOffset
         present(detailedVC, animated: false, completion: nil)
         tableView.deselectRow(at: indexPath, animated: false)
     }
@@ -59,6 +71,10 @@ extension ViewController: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return cellHeight
+    }
+    
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        yOffset = scrollView.contentOffset.y
     }
     
     
